@@ -51,8 +51,8 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                     catch (Exception e)
                     {
                         await trans.RollbackAsync(cancellationToken);
-                        _response = GenericResponse.Create(200, $"Customer Not Created : {e.Message} ",false);
-                     
+                        _response = GenericResponse.Create(200, $"Customer Not Created : {e.Message} ", false);
+
                     }
                     return _response;
                 }
@@ -75,4 +75,4 @@ namespace Mc2.CrudTest.Application.Customers.Commands
         }
     }
 }
-}
+

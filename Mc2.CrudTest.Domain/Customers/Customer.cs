@@ -10,9 +10,9 @@ namespace Mc2.CrudTest.Domain.Customers
 {
     public class Customer
     {
-        private Customer( FirstName firstName, LastName lastName, DateOfBirth dateOfBirth, PhoneNumber phoneNumber, Email email, BankAccountNumber bankAccountNumber)
+        private Customer(CustomerId customerId, FirstName firstName, LastName lastName, DateOfBirth dateOfBirth, PhoneNumber phoneNumber, Email email, BankAccountNumber bankAccountNumber)
         {
-            Id = Guid.NewGuid();
+            Id = customerId;
             FirstName = firstName;
             LastName = lastName;
             DateOfBirth = dateOfBirth;
@@ -21,19 +21,19 @@ namespace Mc2.CrudTest.Domain.Customers
             BankAccountNumber = bankAccountNumber;
         }
 
-        public Guid Id { get; set; }
-        public FirstName FirstName { get; set; }
-        public LastName LastName { get; set; }
-        public DateOfBirth DateOfBirth { get; set; }
-        public PhoneNumber PhoneNumber { get; set; }
-        public Email Email { get; set; }
-        public BankAccountNumber BankAccountNumber { get; set; }
+        public CustomerId Id { get; private set; }
+        public FirstName FirstName { get; private set; }
+        public LastName LastName { get; private set; }
+        public DateOfBirth DateOfBirth { get; private set; }
+        public PhoneNumber PhoneNumber { get; private set; }
+        public Email Email { get; private set; }
+        public BankAccountNumber BankAccountNumber { get; private set; }
 
         public static Customer Create(CustomerDTO customerDTO)
         {
             if (customerDTO == null) return null;
             // i will fix null refrence with throw custom exception in objects value and design exception handling later dont worry
-            return new Customer(FirstName.Create(customerDTO.FirstName), LastName.Create(customerDTO.LastName)
+            return new Customer(new CustomerId(Guid.NewGuid()), FirstName.Create(customerDTO.FirstName), LastName.Create(customerDTO.LastName)
                 , DateOfBirth.Create(customerDTO.DateOfBirth), PhoneNumber.Create(customerDTO.PhoneNumber), 
                 Email.Create(customerDTO.Email),   BankAccountNumber.Create(customerDTO.BankAccountNumber));
 
