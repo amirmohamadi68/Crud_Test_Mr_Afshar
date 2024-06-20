@@ -1,4 +1,5 @@
 ﻿using Mc2.CrudTest.Application.Customers.Commands;
+using Mc2.CrudTest.Domain.Events;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,7 @@ namespace Mc2.CrudTest.Domain.Customers
     public class Customer
     {
         public Customer() { }
+        public static readonly List<DomainEvent> _domainEvents = new();
         private Customer(CustomerId customerId, FirstName firstName, LastName lastName, DateOfBirth dateOfBirth, PhoneNumber phoneNumber, Email email, BankAccountNumber bankAccountNumber)
         {
             Id = customerId;
@@ -33,11 +35,28 @@ namespace Mc2.CrudTest.Domain.Customers
         public static Customer Create(CustomerDTO customerDTO)
         {
             if (customerDTO == null) throw new ArgumentNullException(nameof(customerDTO)); ;
-            // i will fix null refrence with throw custom exception in objects value and design exception handling later dont worry
-            return new Customer(new CustomerId(Guid.NewGuid()), FirstName.Create(customerDTO.FirstName), LastName.Create(customerDTO.LastName)
-                , DateOfBirth.Create(customerDTO.DateOfBirth), PhoneNumber.Create(customerDTO.PhoneNumber), 
-                Email.Create(customerDTO.Email),   BankAccountNumber.Create(customerDTO.BankAccountNumber));
+            var customer = new Customer(new CustomerId(Guid.NewGuid()), FirstName.Create(customerDTO.FirstName), LastName.Create(customerDTO.LastName)
+                            , DateOfBirth.Create(customerDTO.DateOfBirth), PhoneNumber.Create(customerDTO.PhoneNumber),
+                            Email.Create(customerDTO.Email), BankAccountNumber.Create(customerDTO.BankAccountNumber));
+            _domainEvents.Add(new CustomerCreatedEvent(Guid.NewGuid(), nameof(CustomerCreatedEvent), customer.FirstName.Value, customer.LastName.Value, customer.Email.Value
+                                                        , customer.PhoneNumber.PhoneValue.ToString(), customer.BankAccountNumber.Value, customer.DateOfBirth.Value));
+            return customer;
+        }
+        ///for now i coonsidering for update should pass All properties i will change that to builder pattern at the end
+        public void Update(string newName, string newLastName, DateTime newDateOfBrth, ulong newPhoneNumber, string newEmail, string newBankAccountNumber)
+        {
+            FirstName = FirstName.Create(newName);
+            LastName = LastName.Create(newLastName);
+            DateOfBirth = DateOfBirth.Create(newDateOfBrth);
+            PhoneNumber = PhoneNumber.Create(newPhoneNumber);
+            Email = Email.Create(newEmail);
+            BankAccountNumber = BankAccountNumber.Create(newBankAccountNumber);
 
+            _domainEvents.Add(new CustomerUpdatedEvent(Guid.NewGuid(), Id.CId, nameof(CustomerUpdatedEvent), newName, newLastName, newPhoneNumber, newEmail, newBankAccountNumber, newDateOfBrth));
+        }
+        public void ClearEvent()
+        {
+            _domainEvents.Clear();
         }
     }
     public record FirstName
@@ -51,7 +70,7 @@ namespace Mc2.CrudTest.Domain.Customers
         public static FirstName Create(string value)
         {
             if (string.IsNullOrEmpty(value))
-               throw new ArgumentNullException(nameof(value));
+                throw new ArgumentNullException(nameof(value));
             if (value.Length > Length)
                 throw new ArgumentNullException(nameof(value));
             return new FirstName(value);
@@ -96,13 +115,13 @@ namespace Mc2.CrudTest.Domain.Customers
     {
         // i decide make phone number easier :D
         private const int PhoneLength = 13;
-       // private const int CountryCharCodeLength = 2;
+        // private const int CountryCharCodeLength = 2;
         public ulong PhoneValue { get; init; }
-       // public string CountryCharCode { get; init; }
+        // public string CountryCharCode { get; init; }
         private PhoneNumber(ulong phoneValue)
         {
             PhoneValue = phoneValue;
-          
+
         }
         public static PhoneNumber Create(ulong phoneValue)
         {
@@ -131,7 +150,7 @@ namespace Mc2.CrudTest.Domain.Customers
         public string Value { get; init; }
         public Email()
         {
-                
+
         }
         private Email(string email)
         {
