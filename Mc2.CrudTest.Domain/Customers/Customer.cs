@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Mc2.CrudTest.Application.Customers.Commands;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,17 @@ namespace Mc2.CrudTest.Domain.Customers
 {
     public class Customer
     {
+        private Customer( FirstName firstName, LastName lastName, DateOfBirth dateOfBirth, PhoneNumber phoneNumber, Email email, BankAccountNumber bankAccountNumber)
+        {
+            Id = Guid.NewGuid();
+            FirstName = firstName;
+            LastName = lastName;
+            DateOfBirth = dateOfBirth;
+            PhoneNumber = phoneNumber;
+            Email = email;
+            BankAccountNumber = bankAccountNumber;
+        }
+
         public Guid Id { get; set; }
         public FirstName FirstName { get; set; }
         public LastName LastName { get; set; }
@@ -17,8 +29,15 @@ namespace Mc2.CrudTest.Domain.Customers
         public Email Email { get; set; }
         public BankAccountNumber BankAccountNumber { get; set; }
 
+        public static Customer Create(CustomerDTO customerDTO)
+        {
+            if (customerDTO == null) return null;
+            // i will fix null refrence with throw custom exception in objects value and design exception handling later dont worry
+            return new Customer(FirstName.Create(customerDTO.FirstName), LastName.Create(customerDTO.LastName)
+                , DateOfBirth.Create(customerDTO.DateOfBirth), PhoneNumber.Create(customerDTO.PhoneNumber), 
+                Email.Create(customerDTO.Email),   BankAccountNumber.Create(customerDTO.BankAccountNumber));
 
-
+        }
     }
     public record FirstName
     {
@@ -74,33 +93,33 @@ namespace Mc2.CrudTest.Domain.Customers
     }
     public record PhoneNumber
     {
+        // i decide make phone number easier :D
         private const int PhoneLength = 11;
-        private const int CountryCharCodeLength = 2;
-        public int PhoneValue { get; init; }
-        public string CountryCharCode { get; init; }
-        private PhoneNumber(int phoneValue, string CountryCode)
+       // private const int CountryCharCodeLength = 2;
+        public ulong PhoneValue { get; init; }
+       // public string CountryCharCode { get; init; }
+        private PhoneNumber(ulong phoneValue)
         {
             PhoneValue = phoneValue;
-            CountryCharCode = CountryCode;
+          
         }
-        public static PhoneNumber? Create(int phoneValue, string countryCode)
+        public static PhoneNumber? Create(ulong phoneValue)
         {
             if (phoneValue.Equals(0))
                 return null;
-            if (countryCode.Length != CountryCharCodeLength)
-                return null;
-            return new PhoneNumber(phoneValue, countryCode);
+          
+            return new PhoneNumber(phoneValue);
             //other check
         }
-        public ulong toUlong(PhoneNumber phoneNumber)
-        {
-            return CharCodeToDigit(CountryCharCode, PhoneValue);
-        }
+        //public ulong toUlong(PhoneNumber phoneNumber)
+        //{
+        //    return CharCodeToDigit(CountryCharCode, PhoneValue);
+        //}
 
-        private ulong CharCodeToDigit(string countryCharCode, int phoneValue)
-        {
-            throw new NotImplementedException();
-        }
+        //private ulong CharCodeToDigit(string countryCharCode, int phoneValue)
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
     public record Email
     {
