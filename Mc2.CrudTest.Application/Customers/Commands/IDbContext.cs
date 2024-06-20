@@ -7,8 +7,9 @@ namespace Mc2.CrudTest.Application.Customers.Commands
 {
     public interface IDbContext
     {
-        DatabaseFacade Datbase { get; }
+        DatabaseFacade datbase { get; }
         DbSet<Customer> Customers { get; }
+        Task SaveChanges();
 
     }
 }

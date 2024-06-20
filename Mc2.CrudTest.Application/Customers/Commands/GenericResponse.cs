@@ -3,9 +3,19 @@ namespace Mc2.CrudTest.Application.Customers.Commands
 {
     public record GenericResponse
     {
-        public static GenericResponse Create(int v1, string v2, bool v3)
+        private GenericResponse(int StatusCode, string ErrorMessage, bool HasError)
         {
-            throw new NotImplementedException();
+            StatusCode = StatusCode;
+            ErrorMessage = ErrorMessage;
+            HasError = HasError;
+        
+        }
+       public   int StatusCode { get; private set; }
+         public string ErrorMessage { get; private set; }
+        public bool HasError { get; private set; }
+        public static GenericResponse Create(int StatusCode, string ErrorMessage, bool HasError)
+        {
+            return new GenericResponse(StatusCode, ErrorMessage, HasError);
         }
     }
 }

@@ -10,6 +10,7 @@ namespace Mc2.CrudTest.Domain.Customers
 {
     public class Customer
     {
+        public Customer() { }
         private Customer(CustomerId customerId, FirstName firstName, LastName lastName, DateOfBirth dateOfBirth, PhoneNumber phoneNumber, Email email, BankAccountNumber bankAccountNumber)
         {
             Id = customerId;
@@ -31,7 +32,7 @@ namespace Mc2.CrudTest.Domain.Customers
 
         public static Customer Create(CustomerDTO customerDTO)
         {
-            if (customerDTO == null) return null;
+            if (customerDTO == null) throw new ArgumentNullException(nameof(customerDTO)); ;
             // i will fix null refrence with throw custom exception in objects value and design exception handling later dont worry
             return new Customer(new CustomerId(Guid.NewGuid()), FirstName.Create(customerDTO.FirstName), LastName.Create(customerDTO.LastName)
                 , DateOfBirth.Create(customerDTO.DateOfBirth), PhoneNumber.Create(customerDTO.PhoneNumber), 
@@ -41,36 +42,36 @@ namespace Mc2.CrudTest.Domain.Customers
     }
     public record FirstName
     {
-        private const int Length = 30;
+        public const int Length = 30;
         public string Value { get; init; }
         private FirstName(string value)
         {
             Value = value;
         }
-        public static FirstName? Create(string value)
+        public static FirstName Create(string value)
         {
             if (string.IsNullOrEmpty(value))
-                return null;
+               throw new ArgumentNullException(nameof(value));
             if (value.Length > Length)
-                return null;
+                throw new ArgumentNullException(nameof(value));
             return new FirstName(value);
             //other check
         }
     }
     public record LastName
     {
-        private const int Length = 50;
+        public const int Length = 50;
         public string Value { get; init; }
         private LastName(string value)
         {
             Value = value;
         }
-        public static LastName? Create(string value)
+        public static LastName Create(string value)
         {
             if (string.IsNullOrEmpty(value))
-                return null;
+                throw new ArgumentNullException(nameof(value));
             if (value.Length > Length)
-                return null;
+                throw new ArgumentNullException(nameof(value));
             return new LastName(value);
             //other check
         }
@@ -79,22 +80,22 @@ namespace Mc2.CrudTest.Domain.Customers
     {
         private const double ValidYearsOld = 365 * 99;
         public string Value { get; init; }
-        private DateOfBirth(DateTime value)
+        private DateOfBirth(string value)
         {
-            Value = value.ToShortDateString();
+            Value = value;
         }
-        public static DateOfBirth? Create(DateTime value)
+        public static DateOfBirth Create(DateTime value)
         {
             if (value.AddDays(ValidYearsOld) > DateTime.UtcNow)
-                return null;
+                throw new ArgumentNullException(nameof(value));
 
-            return new DateOfBirth(value);
+            return new DateOfBirth(value.ToShortDateString());
         }
     }
     public record PhoneNumber
     {
         // i decide make phone number easier :D
-        private const int PhoneLength = 11;
+        private const int PhoneLength = 13;
        // private const int CountryCharCodeLength = 2;
         public ulong PhoneValue { get; init; }
        // public string CountryCharCode { get; init; }
@@ -103,11 +104,11 @@ namespace Mc2.CrudTest.Domain.Customers
             PhoneValue = phoneValue;
           
         }
-        public static PhoneNumber? Create(ulong phoneValue)
+        public static PhoneNumber Create(ulong phoneValue)
         {
             if (phoneValue.Equals(0))
-                return null;
-          
+                throw new ArgumentNullException(nameof(phoneValue));
+
             return new PhoneNumber(phoneValue);
             //other check
         }
@@ -128,11 +129,15 @@ namespace Mc2.CrudTest.Domain.Customers
         private static readonly Lazy<Regex> EmailFormatRegex =
             new Lazy<Regex>(() => new Regex(EmailRegexPattern, RegexOptions.Compiled | RegexOptions.IgnoreCase));
         public string Value { get; init; }
+        public Email()
+        {
+                
+        }
         private Email(string email)
         {
             Value = email;
         }
-        public static Email? Create(string email)
+        public static Email Create(string email)
         {
             if (string.IsNullOrWhiteSpace(email)) throw new Exception("");
             if (email.Length > MaxLength) throw new Exception();
@@ -150,12 +155,12 @@ namespace Mc2.CrudTest.Domain.Customers
         {
             Value = value;
         }
-        public static BankAccountNumber? Create(string value)
+        public static BankAccountNumber Create(string value)
         {
             if (string.IsNullOrEmpty(value))
-                return null;
+                throw new ArgumentNullException(nameof(value));
             if (value.Length > Length)
-                return null;
+                throw new ArgumentNullException(nameof(value));
             return new BankAccountNumber(value);
             //other check
         }

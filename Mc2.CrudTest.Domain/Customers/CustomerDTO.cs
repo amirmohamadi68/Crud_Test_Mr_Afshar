@@ -2,14 +2,14 @@
 
 namespace Mc2.CrudTest.Application.Customers.Commands
 {
-    public record CustomerDTO
+    public class CustomerDTO
     {
     
-        public string FirstName { get; set; } =string.Empty;
-        public string LastName { get; set; } = string.Empty;
+        public string FirstName { get; set; } 
+        public string LastName { get; set; }
         public DateTime DateOfBirth { get; set; } 
         public ulong PhoneNumber { get; set; }
-        public string Email { get; set; } = string.Empty;
-        public string BankAccountNumber { get; set; } = string.Empty;
+        public string Email { get; set; } 
+        public string BankAccountNumber { get; set; }
     }
 }

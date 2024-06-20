@@ -1,5 +1,6 @@
 ﻿using Mc2.CrudTest.Domain.Customers;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,15 +14,12 @@ namespace Mc2.CrudTest.Application.Customers.Commands
         public CustomerDTO customerDTO { get; set; }
         public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, GenericResponse>
         {
-            private readonly IGenericRespository<Customer> _repository;
+
             private readonly IDbContext _dbContext;
-            private readonly IUnitOfWork _unitOfWork;
             private GenericResponse _response;
-            public CreateCustomerCommandHandler(IGenericRespository<Customer> repository
-             , IUnitOfWork unitOfWork, IDbContext dbContext, GenericResponse genericResponse)
+            public CreateCustomerCommandHandler(IDbContext dbContext)
             {
-                _repository = repository;
-                _unitOfWork = unitOfWork;
+
                 _dbContext = dbContext;
                 // _response = genericResponse;
 
@@ -35,16 +33,15 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                 /// not neccesary because i changed created response
                 // CheckEntityCreate(customerEntity);
 
-                await using (var trans = await _dbContext.Datbase.BeginTransactionAsync(cancellationToken))
+                await using (var trans = await _dbContext.datbase.BeginTransactionAsync(cancellationToken))
                 {
                     try
                     {
-                        bool result = await _repository.AddAsync(customerEntity);
-                        if (!result) throw new Exception("will be Custom later");
-                        bool unitResukt = await _unitOfWork.SaveChangesAsync(); //  i will rise event in savechangs factory
-                                                                                // it was better if i designing event dispatcher pattern in my entities... maybe another time
-                        if (!unitResukt) throw new Exception("will be Custom later");
+                       var res= await _dbContext.Customers.AddAsync(customerEntity);
+                        //  i will rise event in savechangs factory
+                        // it was better if i designing event dispatcher pattern in my entities... maybe another time
 
+                      await  _dbContext.SaveChanges();
                         _response = GenericResponse.Create(201, "Customer Created", true) ?? throw new NullReferenceException();
                         await trans.CommitAsync(cancellationToken);
                     }

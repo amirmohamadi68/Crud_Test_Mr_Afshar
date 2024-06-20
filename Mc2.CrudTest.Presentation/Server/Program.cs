@@ -1,4 +1,10 @@
+using Mc2.CrudTest.Application;
+using Mc2.CrudTest.Application.Customers.Commands;
+using Mc2.CrudTest.Persistanse;
+using Mc2.CrudTest.Persistanse.Context;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Mc2.CrudTest.Presentation
 {
@@ -7,9 +13,12 @@ namespace Mc2.CrudTest.Presentation
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
+            builder.Services.AddDbContext<MyDbContext>(options =>options
+                    .UseSqlServer("Server =.; DataBase = Local; UID = sa; PWD = !QAZ2wsx; Trusted_Connection = True; TrustServerCertificate = True") //ConnectionString
+                    .EnableSensitiveDataLogging(true));
             // Add services to the container.
-
+            builder.Services.AddPersistenceLayer();
+            builder.Services.AddApplicationLayer();
             builder.Services.AddControllersWithViews();
             builder.Services.AddRazorPages();
 

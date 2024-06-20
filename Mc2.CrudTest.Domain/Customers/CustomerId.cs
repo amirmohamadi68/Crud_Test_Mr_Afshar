@@ -2,6 +2,6 @@
 
     //for reviwer :
     // i would not impilmentin IEqutable interface for strongly type ids... there is better way to avoid overriding those methods...
-    public record CustomerId(Guid Id);
+    public record CustomerId(Guid CId);
     
     
