@@ -9,6 +9,6 @@ using System.Threading.Tasks;
 namespace Mc2.CrudTest.Domain.Events
 {
    public record CustomerCreatedEvent (Guid eventId ,string eventName ,string firstName , string LastName , string email , string phoneNumber , string bankAccountNumber , string dateOfBirth): DomainEvent(eventId);
-   public record CustomerUpdatedEvent(Guid eventId,Guid customerId , string eventName, string firstName, string LastName,  ulong phoneNumber ,string email, string bankAccountNumber, DateTime dateOfBirth) : DomainEvent(eventId);
+   public record CustomerUpdatedEvent(Guid eventId,Guid customerId , string eventName, string firstName, string LastName,  string phoneNumber ,string email, string bankAccountNumber, DateTime dateOfBirth) : DomainEvent(eventId);
 
 }

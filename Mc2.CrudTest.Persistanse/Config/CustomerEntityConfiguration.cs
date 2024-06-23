@@ -13,40 +13,60 @@ namespace Mc2.CrudTest.Persistanse.Config
     {
         public void Configure(EntityTypeBuilder<Customer> builder)
         {
-           builder.HasKey(c=>c.Id);
-            builder.Property(c=>c.Id).HasConversion(
+            builder.HasKey(c => c.Id);
+            builder.Property(c => c.Id).HasConversion(
                 CustomerId => CustomerId.CId,
-                value=> new CustomerId(value));
-            builder.OwnsOne(customer => customer.FirstName, firstNameBuilder =>
-            {
-                firstNameBuilder.WithOwner();
+                value => new CustomerId(value));
 
-                firstNameBuilder.Property(firstName => firstName.Value)
-                    .HasColumnName(nameof(Customer.FirstName))
-                    .HasMaxLength(FirstName.Length)
-                    .IsRequired();
 
-            });
-            builder.OwnsOne(customer => customer.LastName, lastNameBuilder =>
-            {
-                lastNameBuilder.WithOwner();
+            builder.Property(e => e.FirstName)
+                .HasConversion(v => v.Value, // to database
+                      v => FirstName.Create(v))
+                .HasColumnName(nameof(Customer.FirstName))
+                .HasMaxLength(FirstName.Length); // from database)
 
-                lastNameBuilder.Property(lastName => lastName.Value)
-                    .HasColumnName(nameof(Customer.LastName))
-                    .HasMaxLength(LastName.Length)
-                    .IsRequired();
-            });
-            builder.OwnsOne(customer => customer.Email, emailBuilder =>
-            {
-                emailBuilder.WithOwner();
+                                                 //builder.OwnsOne(customer => customer.FirstName, firstNameBuilder =>
+                                                 //{
+                                                 //    firstNameBuilder.WithOwner();
 
-                emailBuilder.Property(email => email.Value)
-                    .HasColumnName(nameof(Customer.Email))
-                    .HasMaxLength(Email.MaxLength)
-                    
-                    .IsRequired();
-            });
-            builder.OwnsOne(customer => customer. BankAccountNumber, bankAccountNumberBuilder =>
+            //    firstNameBuilder.Property(firstName => firstName.Value)
+            //        .HasColumnName(nameof(Customer.FirstName))
+            //        .HasMaxLength(FirstName.Length)
+            //        .IsRequired();
+
+            //});
+
+            builder.Property(e => e.LastName)
+                .HasConversion(v => v.Value, // to database
+                      v => LastName.Create(v))
+                .HasColumnName(nameof(Customer.LastName))
+                .HasMaxLength(LastName.Length); // from database)
+
+
+            builder.Property(e => e.DateOfBirth)
+               .HasConversion(v => v.Value, // to database
+                     v => DateOfBirth.Create(DateTime.Parse(v)))
+               .HasColumnName(nameof(Customer.DateOfBirth));
+
+
+
+            builder.Property(e => e.Email)
+               .HasConversion(v => v.Value, // to database
+                     v => Email.Create(v))
+               .HasColumnName(nameof(Customer.Email)).HasMaxLength(Email.MaxLength);
+            
+
+            //builder.OwnsOne(customer => customer.Email, emailBuilder =>
+            //{
+            //    emailBuilder.WithOwner();
+
+            //    emailBuilder.Property(email => email.Value)
+            //        .HasColumnName(nameof(Customer.Email))
+            //        .HasMaxLength(Email.MaxLength)
+
+            //        .IsRequired();
+            //});
+            builder.OwnsOne(customer => customer.BankAccountNumber, bankAccountNumberBuilder =>
             {
                 bankAccountNumberBuilder.WithOwner();
 
@@ -54,15 +74,15 @@ namespace Mc2.CrudTest.Persistanse.Config
                     .HasColumnName(nameof(Customer.BankAccountNumber))
                     .IsRequired();
             });
-            builder.OwnsOne(customer => customer.DateOfBirth, emailBuilder =>
-            {
-                emailBuilder.WithOwner();
+            //builder.OwnsOne(customer => customer.DateOfBirth, emailBuilder =>
+            //{
+            //    emailBuilder.WithOwner();
 
-                emailBuilder.Property(DateOfBirth => DateOfBirth.Value)
-                    .HasColumnName(nameof(Customer.DateOfBirth))
-                    .HasMaxLength(10)
-                    .IsRequired();
-            });
+            //    emailBuilder.Property(DateOfBirth => DateOfBirth.Value)
+            //        .HasColumnName(nameof(Customer.DateOfBirth))
+            //        .HasMaxLength(10)
+            //        .IsRequired();
+            //});
             builder.OwnsOne(customer => customer.PhoneNumber, phonelBuilder =>
             {
                 phonelBuilder.WithOwner();
@@ -81,7 +101,7 @@ namespace Mc2.CrudTest.Persistanse.Config
             .IsRequired();
             // Create a unique index on the computed column
             builder.HasIndex("FullName").IsUnique();
-           
+
 
 
 

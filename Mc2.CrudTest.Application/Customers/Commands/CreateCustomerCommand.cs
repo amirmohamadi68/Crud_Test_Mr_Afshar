@@ -1,31 +1,28 @@
-﻿using Mc2.CrudTest.Domain.Customers;
+﻿using Mc2.CrudTest.Domain.Core;
+using Mc2.CrudTest.Domain.Customers;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
+
 
 namespace Mc2.CrudTest.Application.Customers.Commands
 {
-    public class CreateCustomerCommand : IRequest<GenericResponse>
+    public class CreateCustomerCommand : IRequest<Response>
     {
         public CustomerDTO customerDTO { get; set; }
-        public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, GenericResponse>
+        public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, Response>
         {
-
+          
             private readonly IDbContext _dbContext;
-            private GenericResponse _response;
             public CreateCustomerCommandHandler(IDbContext dbContext)
             {
 
                 _dbContext = dbContext;
+      
                 // _response = genericResponse;
 
             }
 
-            public async Task<GenericResponse> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
+            public async Task<Response> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
             {
                 CheckRequest(request);
                 var customerEntity = Customer.Create(request.customerDTO);
@@ -33,6 +30,7 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                 /// not neccesary because i changed created response
                 // CheckEntityCreate(customerEntity);
 
+ 
                 await using (var trans = await _dbContext.datbase.BeginTransactionAsync(cancellationToken))
                 {
                     try
@@ -41,17 +39,19 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                         //  i will rise event in savechangs factory
                         // it was better if i designing event dispatcher pattern in my entities... maybe another time
 
-                      await  _dbContext.SaveChanges();
-                        _response = GenericResponse.Create(201, "Customer Created", true) ?? throw new NullReferenceException();
+                      await  _dbContext.SaveChangesAsync(cancellationToken);
+                      var  _response = Response.Create(201, "Customer Created", true) ?? throw new NullReferenceException();
                         await trans.CommitAsync(cancellationToken);
+                        return _response;
                     }
                     catch (Exception e)
                     {
                         await trans.RollbackAsync(cancellationToken);
-                        _response = GenericResponse.Create(200, $"Customer Not Created : {e.Message} ", false);
+                      var  _response = Response.Create(200, $"Customer Not Created : {e.Message} ", false);
+                        return _response;
 
                     }
-                    return _response;
+                   
                 }
 
             }

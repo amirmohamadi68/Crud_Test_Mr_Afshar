@@ -1,7 +1,9 @@
 using Mc2.CrudTest.Application;
 using Mc2.CrudTest.Application.Customers.Commands;
+using Mc2.CrudTest.Infrustructure;
 using Mc2.CrudTest.Persistanse;
 using Mc2.CrudTest.Persistanse.Context;
+using Mc2.CrudTest.Presentation.Server.Middlware;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -17,6 +19,7 @@ namespace Mc2.CrudTest.Presentation
                     .UseSqlServer("Server =.; DataBase = Local; UID = sa; PWD = !QAZ2wsx; Trusted_Connection = True; TrustServerCertificate = True") //ConnectionString
                     .EnableSensitiveDataLogging(true));
             // Add services to the container.
+            builder.Services.AddInfrustructureLayer();
             builder.Services.AddPersistenceLayer();
             builder.Services.AddApplicationLayer();
             builder.Services.AddControllersWithViews();
@@ -31,11 +34,11 @@ namespace Mc2.CrudTest.Presentation
             }
             else
             {
-                app.UseExceptionHandler("/Error");
+               
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-
+            app.UseExceptionHandleMiddleware();
             app.UseHttpsRedirection();
 
             app.UseBlazorFrameworkFiles();

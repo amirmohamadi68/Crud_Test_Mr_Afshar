@@ -9,7 +9,9 @@ namespace Mc2.CrudTest.Application.Customers.Commands
     {
         DatabaseFacade datbase { get; }
         DbSet<Customer> Customers { get; }
-        Task SaveChanges();
+        Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+      //  Task<Customer> GetCustomerByIdAsync(CustomerId customerId);
+     
 
     }
 }
