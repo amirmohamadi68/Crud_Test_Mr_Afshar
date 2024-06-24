@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Mc2.CrudTest.Application.Customers.Events
 {
-    internal sealed class CustomerCreatedEventHandler : INotificationHandler<CustomerCreatedEvent>
+    public sealed class CustomerCreatedEventHandler : INotificationHandler<CustomerCreatedEvent>
     {
         private readonly IMessagePublisher _messagePublisher;
         public CustomerCreatedEventHandler(IMessagePublisher messagePublisher)

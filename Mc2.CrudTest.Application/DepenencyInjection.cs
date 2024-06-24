@@ -2,7 +2,9 @@
 using Mc2.CrudTest.Application.Behaivior;
 using Mc2.CrudTest.Application.Customers.Commands;
 using Mc2.CrudTest.Application.Interfaces.Services;
+using Mc2.CrudTest.Domain.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -17,6 +19,7 @@ namespace Mc2.CrudTest.Application
     {
         public static IServiceCollection AddApplicationLayer(this IServiceCollection services)
         {
+
             services.AddScoped<IValidateService , ValidataService>();
             services.AddScoped<IValidator<CreateCustomerCommand>, CreateCustomerValidator>();
             services.AddScoped<IValidator<UpdateCustomerCommand>, UpdateCustomerValidator>();
@@ -32,6 +35,8 @@ namespace Mc2.CrudTest.Application
             }
 
         );
+
+      
             return services;
         }
 }

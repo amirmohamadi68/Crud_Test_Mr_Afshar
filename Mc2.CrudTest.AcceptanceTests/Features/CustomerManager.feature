@@ -1,9 +1,7 @@
-﻿Feature: Customer Manager
+﻿Feature: Create Customer
 
-As a an operator I wish to be able to Create, Update, Delete customers and list all customers
-	
-@mytag
-Scenario: Operator creates, list, update and delete customers 
-	Given to be filled...
-	When to be filled...
-	Then to be filled...
+  Scenario: Successfully create a customer
+    Given a valid customer DTO
+    When the CreateCustomerCommand is handled
+    Then the customer should be created
+    And the response should indicate success
