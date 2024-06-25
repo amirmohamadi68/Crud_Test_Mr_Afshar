@@ -30,25 +30,25 @@ namespace Mc2.CrudTest.Application.Behaivior
 
         private async Task<bool> ValidateEmailUniqe(string email, CancellationToken arg2)
         {
-            var res = await _validateService.CheckCustomerExsistByEmail(email);
+            var res = await _validateService.CheckCustomerUinqeByEmail(email);
             return res;
         }
 
         private async Task<bool> ValidateFullname(CustomerDTO arg1, CancellationToken arg2)
         {
-            var duplicate = await
-                _validateService.CheckCustomerExsistByFullName(arg1.FirstName, arg1.LastName, arg1.DateOfBirth);
-            return duplicate;
+            var IsUniqe = await
+                _validateService.CheckCustomerUniqeFullName(arg1.FirstName, arg1.LastName, arg1.DateOfBirth);
+            return IsUniqe;
         }
 
-        private async Task<bool> ValidatePhoneNumber(string? arg1, CancellationToken token)
+        private async Task<bool> ValidatePhoneNumber(string? PhoneNumber, CancellationToken token)
         {
-            if (arg1 == null) throw new ArgumentNullException(nameof(arg1));
+            if (PhoneNumber == null) throw new ArgumentNullException(nameof(PhoneNumber));
             PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
             try
 
             {
-                var result = await Task.Run(() => phoneNumberUtil.IsPossibleNumber(arg1.ToString(), "IR"));
+                var result = await Task.Run(() => phoneNumberUtil.IsPossibleNumber(PhoneNumber.ToString(), "IR"));
 
                 return result;
             }

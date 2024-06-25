@@ -8,21 +8,24 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using TechTalk.SpecFlow;
-using   Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Mc2.CrudTest.Domain.Core;
 using System.Text;
+using System.Net.Http.Json;
+using Castle.Core.Resource;
+using Azure.Core;
 
 namespace Mc2.CrudTest.AcceptanceTests
 {
     [Binding]
-    public class CreateCustomerStepDefinitions
+    public class RemoveCustomerStepDefinitions
     {
         private readonly ScenarioContext _scenarioContext;
         private WebApplicationFactory<Program> _factory;
         private HttpClient _client;
-
-        public CreateCustomerStepDefinitions(ScenarioContext scenarioContext)
+        public Customer ExsistCustomerDb;
+        public RemoveCustomerStepDefinitions(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
         }
@@ -98,6 +101,7 @@ namespace Mc2.CrudTest.AcceptanceTests
             };
             context.Customers.AddRange(customers);
             context.SaveChanges();
+            ExsistCustomerDb = context.Customers.FirstOrDefault(w => w.FirstName == "Amir2")!;
         }
 
         [AfterScenario]
@@ -106,53 +110,42 @@ namespace Mc2.CrudTest.AcceptanceTests
             _client.Dispose();
             _factory.Dispose();
         }
-
-        [Given(@"Create customer information \((.*),(.*),(.*),(.*),(.*),(.*)\)")]
-        public void GivenCreateCustomerInformationAmirMohamadi(string firstName ,string lastName, string dateOfBirth, string phoneNumber, string email, string bankAccountNumber)
+        [Given(@"there is customer in SeedDataBase")]
+        public void GivenThereIsCustomerInSeedDataBase()
         {
-            var customerDto = new
-            {
-
-                FirstName = firstName,
-                LastName = lastName,
-                DateOfBirth = dateOfBirth,
-                PhoneNumber = phoneNumber,
-                Email = email,
-                BankAccountNumber = bankAccountNumber
-            };
-
-            _scenarioContext["CustomerDto"] = customerDto;
+            ExsistCustomerDb.Id.Should().NotBe(null);
         }
 
-        [When(@"I send a POST request to create the customer")]
-        public async Task WhenISendAPostRequestToCreateTheCustomer()
+        [When(@"I send a Remove request to Remove the customer")]
+        public async Task WhenISendARemoveRequestToRemoveTheCustomer()
         {
-            var customerDto = _scenarioContext["CustomerDto"];
-            var content = new StringContent(JsonConvert.SerializeObject(customerDto), Encoding.UTF8, "application/json");
-            var response = await _client.PostAsync("/customer", content);
-
+            var exsistId = ExsistCustomerDb.Id.CId;
+            var response = await _client.DeleteAsync($"/customer/{exsistId}");
             _scenarioContext["Response"] = response;
         }
 
-        [Then(@"Create result should be succeeded")]
-        public async Task ThenCreateResultShouldBeSucceeded()
+        [Then(@"Get Result must have a Delleted")]
+        public void ThenGetResultMustHaveADelleted()
         {
             var response = _scenarioContext["Response"] as HttpResponseMessage;
             response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         }
 
-        [Then(@"Create result should be failed")]
-        public async Task ThenCreateResultShouldBeFailed()
+        [When(@"I send a Remove request with wrong id")]
+        public async Task WhenISendARemoveRequestWithWrongId()
         {
-            var response = _scenarioContext["Response"] as HttpResponseMessage;
-            response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+           var wrongId = Guid.NewGuid();
+            var response = await _client.DeleteAsync($"/customer/{wrongId}");
+            _scenarioContext["Response"] = response;
 
-            var responseContent = await response.Content.ReadAsStringAsync();
-            //var controllerResponse = JsonConvert.DeserializeObject<Response>(responseContent);
+        }
 
-           // controllerResponse.HasError.Should().BeTrue();
-           // controllerResponse.ErrorMessage.Should().Contain("Email must be unique in the database");
+        [Then(@"Get Result must have a Not Found")]
+        public void ThenGetResultMustHaveANotFound()
+        {
+            var a = _scenarioContext["Response"] as HttpResponseMessage;
+            a.StatusCode.Should().Be(HttpStatusCode.BadRequest);
         }
     }
 }

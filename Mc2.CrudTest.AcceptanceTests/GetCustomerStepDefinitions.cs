@@ -8,21 +8,24 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using TechTalk.SpecFlow;
-using   Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Mc2.CrudTest.Domain.Core;
 using System.Text;
+using System.Net.Http.Json;
+using Azure;
 
 namespace Mc2.CrudTest.AcceptanceTests
 {
     [Binding]
-    public class CreateCustomerStepDefinitions
+    public class GetCustomerStepDefinitions
     {
+
         private readonly ScenarioContext _scenarioContext;
         private WebApplicationFactory<Program> _factory;
         private HttpClient _client;
-
-        public CreateCustomerStepDefinitions(ScenarioContext scenarioContext)
+        public Customer ExsistCustomerDb;
+        public GetCustomerStepDefinitions(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
         }
@@ -98,6 +101,7 @@ namespace Mc2.CrudTest.AcceptanceTests
             };
             context.Customers.AddRange(customers);
             context.SaveChanges();
+            ExsistCustomerDb = context.Customers.FirstOrDefault(w => w.FirstName == "Amir1")!;
         }
 
         [AfterScenario]
@@ -107,52 +111,57 @@ namespace Mc2.CrudTest.AcceptanceTests
             _factory.Dispose();
         }
 
-        [Given(@"Create customer information \((.*),(.*),(.*),(.*),(.*),(.*)\)")]
-        public void GivenCreateCustomerInformationAmirMohamadi(string firstName ,string lastName, string dateOfBirth, string phoneNumber, string email, string bankAccountNumber)
+        [Given(@"there is customer in SeedDB")]
+        public void GivenThereIsCustomerInSeedDB()
         {
-            var customerDto = new
-            {
-
-                FirstName = firstName,
-                LastName = lastName,
-                DateOfBirth = dateOfBirth,
-                PhoneNumber = phoneNumber,
-                Email = email,
-                BankAccountNumber = bankAccountNumber
-            };
-
-            _scenarioContext["CustomerDto"] = customerDto;
+            ExsistCustomerDb.Id.Should().NotBe(null);
+            _scenarioContext["CustomerDto"] = ExsistCustomerDb;
         }
-
-        [When(@"I send a POST request to create the customer")]
-        public async Task WhenISendAPostRequestToCreateTheCustomer()
+        [When(@"I send a Get request to get the customer with wrong id")]
+        public async Task WhenISendAGetRequestToGetTheCustomerWithWrongId()
         {
-            var customerDto = _scenarioContext["CustomerDto"];
-            var content = new StringContent(JsonConvert.SerializeObject(customerDto), Encoding.UTF8, "application/json");
-            var response = await _client.PostAsync("/customer", content);
-
+           
+            var wrongId = Guid.NewGuid();
+            var response = await _client.GetAsync($"/customer/{wrongId}");
             _scenarioContext["Response"] = response;
         }
-
-        [Then(@"Create result should be succeeded")]
-        public async Task ThenCreateResultShouldBeSucceeded()
+  
+        [Then(@"Get Result must have a Bad Request")]
+        public async Task ThenGetResultMustHaveABadRequest()
         {
             var response = _scenarioContext["Response"] as HttpResponseMessage;
-            response!.StatusCode.Should().Be(HttpStatusCode.OK);
-
+            var responseContent = await response.Content.ReadAsStringAsync();
+            responseContent.Should().Contain("Customer not found");
         }
 
-        [Then(@"Create result should be failed")]
-        public async Task ThenCreateResultShouldBeFailed()
+
+        [When(@"I send a Get request to get the customer")]
+        public async Task WhenISendAGetRequestToGetTheCustomer()
+        {
+            //this seed Dto in setup hook
+            // The better way is i send just Id ....
+            var customer = new CustomerDTO
+                {
+                    FirstName = "Amir1",
+                    LastName = "Mohamadi1",
+                    DateOfBirth = new DateTime(1990, 1, 1),
+                    PhoneNumber = "+989362174891",
+                    Email = "a.mmmmmmm@example.com",
+                    BankAccountNumber = "12345678"
+                };
+            var customerId = ExsistCustomerDb.Id.CId;
+            var response = await _client.GetAsync($"/customer/{customerId}");
+            _scenarioContext["Response"] = response;
+      
+        }
+
+        [Then(@"Get Result must have a valid customer")]
+        public async Task ThenGetResultMustHaveAValidCustomer()
         {
             var response = _scenarioContext["Response"] as HttpResponseMessage;
-            response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
             var responseContent = await response.Content.ReadAsStringAsync();
-            //var controllerResponse = JsonConvert.DeserializeObject<Response>(responseContent);
-
-           // controllerResponse.HasError.Should().BeTrue();
-           // controllerResponse.ErrorMessage.Should().Contain("Email must be unique in the database");
+            var existFirstName = ExsistCustomerDb.FirstName.Value;
+            responseContent.Should().Contain(existFirstName);
         }
     }
 }

@@ -13,7 +13,7 @@ namespace Mc2.CrudTest.Application.Customers.Commands
 {
     public class RemoveCustomerCommand : IRequest<Response>
     {
-        public CustomerDTO customerDTO { get; set; }
+        public Guid Guid { get; set; }
 
         public class RemoveCustomerCommandHandler : IRequestHandler<RemoveCustomerCommand, Response>
         {
@@ -31,11 +31,12 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                 {
 
                     // i should use Specification to create query and avoid creating thos object for checking equlity
-                    var requestId = new CustomerId(request.customerDTO.Id);
+                    var requestId = new CustomerId(request.Guid);
                     var customer =await _dbContext.Customers.FirstOrDefaultAsync(c => c.Id == requestId);
                     if (customer == null)
                     {
-                        throw new Exception("there is no customer with that Id to Remove");
+                        throw new Exception("there is no customer with that Id to Remove"); // i dont have time to throw Custom Exception and handle that in midlware...
+                                                                                            // i did that for validating and this same as that
 
                     }
                     // i should move this logic to repository and make that async
@@ -43,7 +44,7 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                     ;
                      
                     await _dbContext.SaveChangesAsync(cancellationToken);
-                  var  _response = Response.Create(201, "Customer Updated", true) ?? throw new NullReferenceException();
+                  var  _response = Response.Create(200, "Customer Removed", true) ;
                     await trans.CommitAsync(cancellationToken);
                     return _response;
                 }

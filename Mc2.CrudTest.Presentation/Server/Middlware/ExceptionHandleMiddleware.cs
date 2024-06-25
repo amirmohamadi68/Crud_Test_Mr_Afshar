@@ -1,5 +1,6 @@
 ﻿using Azure;
 using Mc2.CrudTest.Domain.Core;
+using Microsoft.AspNetCore.Http;
 using Response = Mc2.CrudTest.Domain.Core.Response;
 
 namespace Mc2.CrudTest.Presentation.Server.Middlware
@@ -39,16 +40,31 @@ namespace Mc2.CrudTest.Presentation.Server.Middlware
             }
             else if (ex is ArgumentException)
             {
-                await httpContext.Response.WriteAsync("Invalid argument");
+                await httpContext.Response.WriteAsync($"ArgumentException : {ex.Message}");
             }
             else if (ex is CustomerValidateException)
             {
                 List<ValidationError> dataError = (ex as CustomerValidateException).GetErrors();
+                httpContext.Response.ContentType = "application/json";
+                httpContext.Response.StatusCode = 400;
                 await httpContext.Response.WriteAsJsonAsync(
-                  new  GenericRespons<List<ValidationError>>(500, "Validate error", false , dataError));
+                  new  GenericRespons<List<ValidationError>>(400, "Validate error", false , dataError));
+            }
+            else if (ex is ArgumentNullException)
+             {    httpContext.Response.StatusCode = 400;
+           
+                await httpContext.Response.WriteAsJsonAsync(
+                   Response.Create(_StatusCode: 400, _ErrorMessage: $"{ex.Message} is null ", true)
+               );
+            }
+            else if (ex is SystemException)
+            {
+                httpContext.Response.StatusCode = 400;
             }
             else
             {
+                httpContext.Response.StatusCode = 400;
+
                 await httpContext.Response.WriteAsync("Unknown error");
             }
         }

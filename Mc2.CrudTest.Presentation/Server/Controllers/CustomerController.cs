@@ -33,19 +33,19 @@ namespace Mc2.CrudTest.Presentation.Server.Controllers
             var a = await mediator.Send(new UpdateCustomerCommand { customerDTO = request });
             return a;
         }
-        [HttpGet("~/Customer")]
-        public async Task<GenericRespons<Customer>> GetCustomerById([FromBody] CustomerDTO request, CancellationToken cancellationToken)
+        [HttpGet("~/customer/{id}")]
+        public async Task<GenericRespons<Customer>> GetCustomerById(Guid Id, CancellationToken cancellationToken)
         {
-            var a = await mediator.Send(new GetCustomerQuery { CustomerDTO = request });
+            var a = await mediator.Send(new GetCustomerQuery { CustomerId = Id });
             return a;
 
         }
 
-        [HttpDelete("~/Customer")]
-        public async Task<Response> RemoveCustomerById([FromBody] CustomerDTO request, CancellationToken cancellationToken)
+        [HttpDelete("~/Customer/{Id}")]
+        public async Task<Response> RemoveCustomerById(Guid Id, CancellationToken cancellationToken)
         {
 
-            var result = await mediator.Send(new RemoveCustomerCommand { customerDTO = request });
+            var result = await mediator.Send(new RemoveCustomerCommand { Guid = Id });
             return result;
         }
     }

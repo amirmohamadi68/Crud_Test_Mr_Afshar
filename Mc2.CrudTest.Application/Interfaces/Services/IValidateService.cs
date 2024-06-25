@@ -11,8 +11,8 @@ namespace Mc2.CrudTest.Application.Interfaces.Services
 {
     public interface IValidateService
     {
-        public Task<bool> CheckCustomerExsistByFullName(string firstname, string lastname, DateTime datteBitrh);
-        public Task<bool> CheckCustomerExsistByEmail(string email);
+        public Task<bool> CheckCustomerUniqeFullName(string firstname, string lastname, DateTime datteBitrh);
+        public Task<bool> CheckCustomerUinqeByEmail(string email);
 
     }
 
@@ -26,7 +26,7 @@ namespace Mc2.CrudTest.Application.Interfaces.Services
         }
 
 
-        public async Task<bool> CheckCustomerExsistByFullName(string firstname, string lastname, DateTime datteBitrh)
+        public async Task<bool> CheckCustomerUniqeFullName(string firstname, string lastname, DateTime datteBitrh)
         {
             var _firstName = FirstName.Create(firstname);
             var _lastName = LastName.Create(lastname);
@@ -35,6 +35,7 @@ namespace Mc2.CrudTest.Application.Interfaces.Services
             var res = await _dbContext.Customers.Where(w =>
                     w.FirstName == _firstName && w.LastName == _lastName && w.DateOfBirth == _dateOfBirth)
                 .FirstOrDefaultAsync();
+            
             if (res == null)
             {
                 return true;
@@ -43,7 +44,7 @@ namespace Mc2.CrudTest.Application.Interfaces.Services
 
         }
 
-        public async Task<bool> CheckCustomerExsistByEmail(string email)
+        public async Task<bool> CheckCustomerUinqeByEmail(string email)
         {
             var _email = Email.Create(email); 
             var res = await _dbContext.Customers.Where(w => w.Email == _email )

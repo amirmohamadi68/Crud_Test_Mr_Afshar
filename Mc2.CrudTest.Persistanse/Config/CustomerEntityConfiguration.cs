@@ -93,14 +93,14 @@ namespace Mc2.CrudTest.Persistanse.Config
 
                     .IsRequired();
             });
-            builder.Property<string>("FullName")
-                .HasComputedColumnSql("CONCAT(FirstName, '-', LastName, '-', DateOfBirth)")
-                .HasColumnName("FullName")
-                .ValueGeneratedOnAddOrUpdate()
-                .HasMaxLength(255)
-            .IsRequired();
-            // Create a unique index on the computed column
-            builder.HasIndex("FullName").IsUnique();
+            //builder.Property<string>("FullName")
+            //    .HasComputedColumnSql("CONCAT(FirstName, '-', LastName, '-', DateOfBirth)")
+            //    .HasColumnName("FullName")
+            //    .ValueGeneratedOnAddOrUpdate()
+            //    .HasMaxLength(255)
+            //.IsRequired();
+            //// Create a unique index on the computed column
+            //builder.HasIndex("FullName").IsUnique();
 
 
 

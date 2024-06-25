@@ -1,6 +1,7 @@
 ﻿
 namespace Mc2.CrudTest.Domain.Core
 {
+    [Serializable]
     public record Response
     {
         private Response(int _StatusCode, string _ErrorMessage, bool _HasError)

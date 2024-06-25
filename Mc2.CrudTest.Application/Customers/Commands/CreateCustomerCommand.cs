@@ -40,14 +40,15 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                         // it was better if i designing event dispatcher pattern in my entities... maybe another time
 
                       await  _dbContext.SaveChangesAsync(cancellationToken);
-                      var  _response = Response.Create(201, "Customer Created", true) ?? throw new NullReferenceException();
+                      var  _response = Response.Create(201, "Customer Created", false) ;
+
                         await trans.CommitAsync(cancellationToken);
                         return _response;
                     }
                     catch (Exception e)
                     {
                         await trans.RollbackAsync(cancellationToken);
-                      var  _response = Response.Create(200, $"Customer Not Created : {e.Message} ", false);
+                      var  _response = Response.Create(400, $"Customer Not Created : {e.Message} ", false);
                         return _response;
 
                     }
@@ -56,11 +57,6 @@ namespace Mc2.CrudTest.Application.Customers.Commands
 
             }
 
-            private static void CheckEntityCreate(Customer? customerEntity)
-            {
-                if (customerEntity == null)
-                    throw new ArgumentNullException(nameof(customerEntity));
-            }
 
             private static void CheckRequest(CreateCustomerCommand request)
             {

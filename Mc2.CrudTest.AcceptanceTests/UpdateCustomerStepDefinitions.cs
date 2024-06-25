@@ -8,21 +8,22 @@ using Newtonsoft.Json;
 using System;
 using System.Net;
 using TechTalk.SpecFlow;
-using   Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Mc2.CrudTest.Domain.Core;
 using System.Text;
-
+using System.Net.Http.Json;
 namespace Mc2.CrudTest.AcceptanceTests
 {
     [Binding]
-    public class CreateCustomerStepDefinitions
+    public class UpdateCustomerStepDefinitions
     {
+
         private readonly ScenarioContext _scenarioContext;
         private WebApplicationFactory<Program> _factory;
         private HttpClient _client;
-
-        public CreateCustomerStepDefinitions(ScenarioContext scenarioContext)
+        public Customer ExsistCustomerDb;
+        public UpdateCustomerStepDefinitions(ScenarioContext scenarioContext)
         {
             _scenarioContext = scenarioContext;
         }
@@ -98,6 +99,7 @@ namespace Mc2.CrudTest.AcceptanceTests
             };
             context.Customers.AddRange(customers);
             context.SaveChanges();
+            ExsistCustomerDb = context.Customers.FirstOrDefault(w => w.FirstName == "Amir2")!;
         }
 
         [AfterScenario]
@@ -107,15 +109,16 @@ namespace Mc2.CrudTest.AcceptanceTests
             _factory.Dispose();
         }
 
-        [Given(@"Create customer information \((.*),(.*),(.*),(.*),(.*),(.*)\)")]
-        public void GivenCreateCustomerInformationAmirMohamadi(string firstName ,string lastName, string dateOfBirth, string phoneNumber, string email, string bankAccountNumber)
-        {
-            var customerDto = new
-            {
 
+        [Given(@"Update customer information \((.*),(.*),(.*),(.*),(.*),(.*)\)")]
+        public void GivenCreateCustomerInformationAmirMohamadi(string firstName, string lastName, string dateOfBirth, string phoneNumber, string email, string bankAccountNumber)
+        {
+            var customerDto = new CustomerDTO
+            {
+                Id = ExsistCustomerDb.Id.CId,
                 FirstName = firstName,
                 LastName = lastName,
-                DateOfBirth = dateOfBirth,
+                DateOfBirth =DateTime.Parse( dateOfBirth),
                 PhoneNumber = phoneNumber,
                 Email = email,
                 BankAccountNumber = bankAccountNumber
@@ -123,36 +126,38 @@ namespace Mc2.CrudTest.AcceptanceTests
 
             _scenarioContext["CustomerDto"] = customerDto;
         }
-
-        [When(@"I send a POST request to create the customer")]
-        public async Task WhenISendAPostRequestToCreateTheCustomer()
+        [Given(@"there is customer in DB")]
+        public void GivenThereIsCustomerInDB()
         {
-            var customerDto = _scenarioContext["CustomerDto"];
-            var content = new StringContent(JsonConvert.SerializeObject(customerDto), Encoding.UTF8, "application/json");
-            var response = await _client.PostAsync("/customer", content);
+            ExsistCustomerDb.Id.Should().NotBe(null);
+        }
 
+
+        [When(@"I send a PUT request to update the customer")]
+        public async Task WhenISendAPUTRequestToUpdateTheCustomer()
+        {
+            var customerDto = _scenarioContext["CustomerDto"] as CustomerDTO;
+            var content = new StringContent(JsonConvert.SerializeObject(customerDto), Encoding.UTF8, "application/json");
+            var response = await _client.PutAsync("/customer", content);
             _scenarioContext["Response"] = response;
         }
 
-        [Then(@"Create result should be succeeded")]
-        public async Task ThenCreateResultShouldBeSucceeded()
+        [Then(@"Update result should be succeeded")]
+        public void ThenUpdateResultShouldBeSucceeded()
         {
             var response = _scenarioContext["Response"] as HttpResponseMessage;
             response!.StatusCode.Should().Be(HttpStatusCode.OK);
 
         }
 
-        [Then(@"Create result should be failed")]
-        public async Task ThenCreateResultShouldBeFailed()
+
+        [Then(@"Update result should be failed")]
+        public void ThenUpdateResultShouldBeFailed()
         {
             var response = _scenarioContext["Response"] as HttpResponseMessage;
             response!.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-
-            var responseContent = await response.Content.ReadAsStringAsync();
-            //var controllerResponse = JsonConvert.DeserializeObject<Response>(responseContent);
-
-           // controllerResponse.HasError.Should().BeTrue();
-           // controllerResponse.ErrorMessage.Should().Contain("Email must be unique in the database");
         }
+
+      
     }
 }

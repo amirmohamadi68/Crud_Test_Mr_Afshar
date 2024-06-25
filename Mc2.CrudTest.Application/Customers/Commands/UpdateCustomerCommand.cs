@@ -34,7 +34,12 @@ namespace Mc2.CrudTest.Application.Customers.Commands
 
                 CheckRequest(request);
                 var customerId = new CustomerId(request.customerDTO.Id);
-                var oldCustomer = await _dbContext.Customers.FirstOrDefaultAsync(c => c.Id == customerId);
+             var customerFirstName =  FirstName.Create(request.customerDTO.FirstName);
+                var customerLastName = LastName.Create(request.customerDTO.LastName);
+                var customerDateOfBirth = DateOfBirth.Create(request.customerDTO.DateOfBirth);
+                var oldCustomer = await _dbContext.Customers.Where(c => c.Id == customerId || (c.FirstName == customerFirstName && c.LastName == customerLastName && c.DateOfBirth == customerDateOfBirth))
+                    .FirstOrDefaultAsync();
+
                 await using (var trans = await _dbContext.datbase.BeginTransactionAsync(cancellationToken))
                 {
                   
@@ -55,7 +60,7 @@ namespace Mc2.CrudTest.Application.Customers.Commands
                     //fix cuncurecy later
                   
                    // await _repository.UpdateAsync(oldCustomer);
-                        _response = Response.Create(201, "Customer Updated", true) ?? throw new NullReferenceException();
+                        _response = Response.Create(201, "Customer Updated", false) ;
                     await trans.CommitAsync(cancellationToken);
                     return _response;
                 }
@@ -66,7 +71,7 @@ namespace Mc2.CrudTest.Application.Customers.Commands
             private void CheckRequest(UpdateCustomerCommand request)
             {
                
-               if(request.customerDTO == null ) throw new ArgumentNullException("request update is null");
+               if(request.customerDTO == null ) throw new ArgumentNullException(nameof(UpdateCustomerCommand));
             }
         }
 
