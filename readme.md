@@ -3,7 +3,8 @@
 Hello and thank you for your attention,
 I hope I will be accepted by you ,
 i have write comment in my codes some line i had better ideia but i created that simple and write comment for better way
-i was commented RabbitMq publishing Event Coonfigure because i did have docker desktop to run containers but i put docker-campose file just set it to your network name and uncomment publishing method
+i was commented RabbitMq publishing Event Coonfigure because i did not have docker desktop to run containers so I used in memory sql database for test unit and manually sql connection string in my codes if you want to see dB you should run update-database in persistence layer .
+ i put docker-campose file just set it to your network name and uncomment publishing method
 run : docker-compose up --build -- after config
 
 Please read each note very carefully!
